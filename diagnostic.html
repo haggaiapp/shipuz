@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>אבחון PWA</title>
+<style>
+body{font-family:system-ui,sans-serif;background:#0a0e14;color:#e2eaf4;padding:16px;font-size:15px;line-height:1.6;}
+h1{font-size:1.2rem;margin-bottom:16px;}
+.row{background:#1c2330;border:1px solid #2a3547;border-radius:10px;padding:12px 14px;margin-bottom:10px;}
+.row .lbl{font-weight:700;margin-bottom:4px;}
+.ok{color:#00c896;}
+.err{color:#ef4444;}
+.warn{color:#f59e0b;}
+pre{background:#0a0e14;border:1px solid #2a3547;border-radius:8px;padding:10px;overflow-x:auto;font-size:.75rem;direction:ltr;text-align:left;white-space:pre-wrap;word-break:break-all;}
+button{background:#00c896;color:#061410;border:none;border-radius:8px;padding:12px 20px;font-size:1rem;font-weight:700;cursor:pointer;margin-top:10px;width:100%;}
+</style>
+</head>
+<body>
+<h1>🔍 אבחון PWA — shipuz</h1>
+
+<div class="row">
+  <div class="lbl">0. דפדפן וגרסה</div>
+  <div id="ua"></div>
+</div>
+
+<div class="row">
+  <div class="lbl">1. כתובת נוכחית</div>
+  <div id="url"></div>
+</div>
+
+<div class="row">
+  <div class="lbl">2. HTTPS</div>
+  <div id="https"></div>
+</div>
+
+<div class="row">
+  <div class="lbl">3. Manifest מקושר ב-HTML</div>
+  <div id="manifestLink"></div>
+</div>
+
+<div class="row">
+  <div class="lbl">4. Manifest נטען בהצלחה</div>
+  <div id="manifestFetch"></div>
+  <pre id="manifestContent"></pre>
+</div>
+
+<div class="row">
+  <div class="lbl">5. אייקונים נטענים</div>
+  <div id="icons"></div>
+</div>
+
+<div class="row">
+  <div class="lbl">6. Service Worker</div>
+  <div id="sw"></div>
+</div>
+
+<div class="row">
+  <div class="lbl">7. beforeinstallprompt (אירוע התקנה)</div>
+  <div id="installEvent">⏳ מאזין... (אם לא קרה כלום אחרי כמה שניות = לא הופעל)</div>
+</div>
+
+<div class="row">
+  <div class="lbl">8. getInstalledRelatedApps / display-mode</div>
+  <div id="displayMode"></div>
+</div>
+
+<button id="installBtn" style="display:none;">📲 התקן אפליקציה (אם הכפתור מופיע - זה אומר שהדפדפן מוכן!)</button>
+
+<script>
+const $ = id => document.getElementById(id);
+
+// 0. User Agent
+const ua = navigator.userAgent;
+let chromeMatch = ua.match(/Chrome\/(\d+)/);
+let isWebView = /; wv\)/.test(ua) || (/Version\//.test(ua) && /Chrome/.test(ua) === false);
+let uaInfo = '<div style="word-break:break-all;font-size:.7rem;opacity:.7;margin-bottom:6px;">' + ua + '</div>';
+if (chromeMatch) {
+  const v = parseInt(chromeMatch[1]);
+  uaInfo += '<span class="' + (v >= 76 ? 'ok' : 'err') + '">Chrome ' + v + (v >= 76 ? ' ✓ (תומך PWA install)' : ' ✗ (ישן מדי - דורש 76+)') + '</span>';
+} else {
+  uaInfo += '<span class="err">✗ לא זוהה Chrome בכלל</span>';
+}
+if (/; wv\)/.test(ua)) {
+  uaInfo += '<br><span class="err">⚠️ זה WebView (אפליקציה אחרת פתחה את הדף, לא Chrome עצמאי) - PWA install לא יעבוד!</span>';
+}
+$('ua').innerHTML = uaInfo;
+
+// 1. URL
+$('url').textContent = location.href;
+
+// 2. HTTPS
+$('https').innerHTML = location.protocol === 'https:'
+  ? '<span class="ok">✓ HTTPS תקין</span>'
+  : '<span class="err">✗ לא HTTPS - חובה ל-PWA!</span> (' + location.protocol + ')';
+
+// 3. Manifest link tag
+const manifestEl = document.querySelector('link[rel="manifest"]');
+// בודק גם בעמוד הראשי - אבל זה קובץ נפרד, אז נבדוק ידנית
+fetch('manifest.json').then(r => {
+  if (!r.ok) {
+    $('manifestLink').innerHTML = '<span class="err">✗ manifest.json לא נמצא בנתיב הזה (status ' + r.status + ')</span>';
+    $('manifestFetch').innerHTML = '<span class="err">✗ נכשל</span>';
+    return;
+  }
+  $('manifestLink').innerHTML = '<span class="ok">✓ manifest.json קיים בנתיב הנכון</span>';
+  return r.json().then(data => {
+    $('manifestFetch').innerHTML = '<span class="ok">✓ נטען ותקין כ-JSON</span>';
+    $('manifestContent').textContent = JSON.stringify(data, null, 2);
+
+    // check icons
+    let iconResults = [];
+    let pending = (data.icons || []).length;
+    if (pending === 0) {
+      $('icons').innerHTML = '<span class="err">✗ אין מערך icons ב-manifest</span>';
+    }
+    (data.icons || []).forEach(icon => {
+      const img = new Image();
+      img.onload = () => {
+        iconResults.push('<span class="ok">✓ ' + icon.src + ' (' + img.naturalWidth + 'x' + img.naturalHeight + ') purpose=' + (icon.purpose||'(none)') + '</span>');
+        pending--;
+        if (pending === 0) $('icons').innerHTML = iconResults.join('<br>');
+      };
+      img.onerror = () => {
+        iconResults.push('<span class="err">✗ ' + icon.src + ' - לא נטען!</span>');
+        pending--;
+        if (pending === 0) $('icons').innerHTML = iconResults.join('<br>');
+      };
+      img.src = icon.src;
+    });
+
+    // check start_url / scope match
+    const su = data.start_url || '';
+    const sc = data.scope || '';
+    let extra = '<br><br><b>start_url:</b> ' + su + '<br><b>scope:</b> ' + sc + '<br><b>display:</b> ' + (data.display||'(none - חסר!)');
+    if (!data.display || data.display === 'browser') {
+      extra += '<br><span class="err">✗ display חייב להיות standalone/fullscreen/minimal-ui כדי לאפשר התקנה!</span>';
+    } else {
+      extra += '<br><span class="ok">✓ display תקין</span>';
+    }
+    $('manifestContent').innerHTML += extra;
+  });
+}).catch(e => {
+  $('manifestLink').innerHTML = '<span class="err">✗ שגיאה בטעינת manifest.json: ' + e.message + '</span>';
+  $('manifestFetch').innerHTML = '<span class="err">✗ נכשל</span>';
+});
+
+// 6. Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    if (regs.length === 0) {
+      $('sw').innerHTML = '<span class="err">✗ אין Service Worker רשום כלל!</span>';
+    } else {
+      $('sw').innerHTML = regs.map(r =>
+        '<span class="ok">✓ רשום: ' + r.scope + ' (active: ' + (r.active ? r.active.state : 'אין') + ')</span>'
+      ).join('<br>');
+    }
+  });
+  // try registering fresh
+  fetch('sw.js').then(r => {
+    if (!r.ok) {
+      $('sw').innerHTML += '<br><span class="err">✗ sw.js לא נמצא (status ' + r.status + ')</span>';
+    } else {
+      $('sw').innerHTML += '<br><span class="ok">✓ sw.js קיים בנתיב הנכון</span>';
+    }
+  }).catch(e => {
+    $('sw').innerHTML += '<br><span class="err">✗ שגיאה בטעינת sw.js: ' + e.message + '</span>';
+  });
+} else {
+  $('sw').innerHTML = '<span class="err">✗ הדפדפן לא תומך ב-Service Worker</span>';
+}
+
+// 7. beforeinstallprompt
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  $('installEvent').innerHTML = '<span class="ok">✓✓✓ הופעל! הדפדפן מוכן להתקנה אמיתית!</span>';
+  $('installBtn').style.display = 'block';
+});
+window.addEventListener('appinstalled', () => {
+  $('installEvent').innerHTML += '<br><span class="ok">✓ האפליקציה הותקנה!</span>';
+});
+setTimeout(() => {
+  if (!deferredPrompt) {
+    $('installEvent').innerHTML = '<span class="err">✗ beforeinstallprompt לא הופעל - הדפדפן לא מציע התקנה אמיתית</span>';
+  }
+}, 3000);
+
+$('installBtn').addEventListener('click', () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+  }
+});
+
+// 8. display-mode
+const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+$('displayMode').innerHTML = isStandalone
+  ? '<span class="ok">✓ רץ במצב standalone (כבר מותקן!)</span>'
+  : '<span class="warn">פתוח כעמוד דפדפן רגיל (display-mode: browser)</span>';
+</script>
+</body>
+</html>
