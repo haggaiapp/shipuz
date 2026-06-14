@@ -147,24 +147,24 @@ fetch('manifest.json').then(r => {
 
 // 6. Service Worker
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.getRegistrations().then(regs => {
-    if (regs.length === 0) {
-      $('sw').innerHTML = '<span class="err">✗ אין Service Worker רשום כלל!</span>';
-    } else {
-      $('sw').innerHTML = regs.map(r =>
-        '<span class="ok">✓ רשום: ' + r.scope + ' (active: ' + (r.active ? r.active.state : 'אין') + ')</span>'
-      ).join('<br>');
-    }
+  // נרשום גם מכאן, עם לוג שגיאה מפורט
+  navigator.serviceWorker.register('sw.js', {scope: './'}).then(reg => {
+    $('sw').innerHTML = '<span class="ok">✓ נרשם בהצלחה מכאן: ' + reg.scope + '</span>';
+  }).catch(err => {
+    $('sw').innerHTML = '<span class="err">✗ רישום נכשל: ' + err.message + '</span>';
   });
-  // try registering fresh
+
+  navigator.serviceWorker.getRegistrations().then(regs => {
+    let extra = regs.length === 0
+      ? '<br><span class="warn">(getRegistrations מחזיר 0 - אולי עדיין לא הסתיים, רענן)</span>'
+      : '<br>' + regs.map(r => '<span class="ok">✓ פעיל: ' + r.scope + ' (' + (r.active ? r.active.state : 'אין') + ')</span>').join('<br>');
+    setTimeout(() => { $('sw').innerHTML += extra; }, 500);
+  });
+
   fetch('sw.js').then(r => {
-    if (!r.ok) {
-      $('sw').innerHTML += '<br><span class="err">✗ sw.js לא נמצא (status ' + r.status + ')</span>';
-    } else {
-      $('sw').innerHTML += '<br><span class="ok">✓ sw.js קיים בנתיב הנכון</span>';
-    }
+    $('sw').innerHTML += '<br>' + (r.ok ? '<span class="ok">✓ sw.js קיים בנתיב הנכון</span>' : '<span class="err">✗ sw.js לא נמצא (status ' + r.status + ')</span>');
   }).catch(e => {
-    $('sw').innerHTML += '<br><span class="err">✗ שגיאה בטעינת sw.js: ' + e.message + '</span>';
+    $('sw').innerHTML += '<br><span class="err">✗ שגיאה: ' + e.message + '</span>';
   });
 } else {
   $('sw').innerHTML = '<span class="err">✗ הדפדפן לא תומך ב-Service Worker</span>';
