@@ -20,6 +20,11 @@ button{background:#00c896;color:#061410;border:none;border-radius:8px;padding:12
 <h1>🔍 אבחון PWA — shipuz</h1>
 
 <div class="row">
+  <div class="lbl">0. דפדפן וגרסה</div>
+  <div id="ua"></div>
+</div>
+
+<div class="row">
   <div class="lbl">1. כתובת נוכחית</div>
   <div id="url"></div>
 </div>
@@ -64,6 +69,22 @@ button{background:#00c896;color:#061410;border:none;border-radius:8px;padding:12
 
 <script>
 const $ = id => document.getElementById(id);
+
+// 0. User Agent
+const ua = navigator.userAgent;
+let chromeMatch = ua.match(/Chrome\/(\d+)/);
+let isWebView = /; wv\)/.test(ua) || (/Version\//.test(ua) && /Chrome/.test(ua) === false);
+let uaInfo = '<div style="word-break:break-all;font-size:.7rem;opacity:.7;margin-bottom:6px;">' + ua + '</div>';
+if (chromeMatch) {
+  const v = parseInt(chromeMatch[1]);
+  uaInfo += '<span class="' + (v >= 76 ? 'ok' : 'err') + '">Chrome ' + v + (v >= 76 ? ' ✓ (תומך PWA install)' : ' ✗ (ישן מדי - דורש 76+)') + '</span>';
+} else {
+  uaInfo += '<span class="err">✗ לא זוהה Chrome בכלל</span>';
+}
+if (/; wv\)/.test(ua)) {
+  uaInfo += '<br><span class="err">⚠️ זה WebView (אפליקציה אחרת פתחה את הדף, לא Chrome עצמאי) - PWA install לא יעבוד!</span>';
+}
+$('ua').innerHTML = uaInfo;
 
 // 1. URL
 $('url').textContent = location.href;
