@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>ניהול שיפוץ</title>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="manifest" id="pwaManifest">
+<script>
+(function(){
+  const manifest = {
+    "name": "ניהול שיפוץ",
+    "short_name": "ניהול שיפוץ",
+    "description": "מערכת לניהול הוצאות, עובדים ומשכורות לשיפוץ",
+    "start_url": "/shipuz/",
+    "scope": "/shipuz/",
+    "display": "standalone",
+    "orientation": "portrait",
+    "background_color": "#0a0e14",
+    "theme_color": "#0a0e14",
+    "dir": "rtl",
+    "lang": "he",
+    "icons": [
+      {"src": "/shipuz/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+      {"src": "/shipuz/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"}
+    ]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type: 'application/manifest+json'});
+  const url = URL.createObjectURL(blob);
+  document.getElementById('pwaManifest').href = url;
+})();
+</script>>
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="theme-color" content="#0a0e14">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ניהול שיפוץ">
+<style>
+:root{--bg:#0a0e14;--sf:#131820;--sf2:#1c2330;--sf3:#242d3b;--bd:#2a3547;--ac:#00c896;--ac2:#3b82f6;--ac3:#f59e0b;--ac4:#ec4899;--tx:#e2eaf4;--tx2:#8899b0;--tx3:#5c6e84;--er:#ef4444;--r:14px;--rs:9px;--fn:'Heebo',sans-serif;}
+body.light{--bg:#f0f4f8;--sf:#fff;--sf2:#e8eef5;--sf3:#dde5ee;--bd:#c8d5e3;--tx:#1a2332;--tx2:#4a5e74;--tx3:#7a92a8;--er:#dc2626;}
+body.light input,body.light select,body.light textarea{color-scheme:light;}
+body.light select option{background:#e8eef5;}
+body.light .hdr{background:linear-gradient(160deg,#dde5ee,#e8eef5)!important;border-bottom-color:var(--bd);}
+body.light .tab.active{color:var(--ac);}body.light .tab{color:var(--tx3);}
+body.light input[type=date],body.light input[type=time]{color-scheme:light;}
+body.light tbody tr:hover{background:rgba(0,200,150,.05);}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:var(--fn);background:var(--bg);color:var(--tx);min-height:100vh;font-size:15px;}
+
+/* ── HEADER (always top, tabs inside) ── */
+.hdr{background:linear-gradient(160deg,#0d1522,#131820);border-bottom:1px solid var(--bd);padding:13px 14px 0;position:sticky;top:0;z-index:200;flex-shrink:0;}
+.hdr-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:9px;}
+.hdr-t{font-size:1.1rem;font-weight:900;letter-spacing:-.4px;}
+.hdr-t span{background:linear-gradient(90deg,var(--ac),var(--ac3));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;}
+.hdr-s{font-size:.63rem;color:var(--tx3);margin-top:1px;}
+.hico{background:none;border:none;color:var(--tx3);cursor:pointer;padding:6px;border-radius:8px;display:flex;transition:all .18s;}
+.hico:hover{color:var(--tx);background:var(--sf2);}
+.hico svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ── BOTTOM NAV ── */
+.bnav{position:fixed;bottom:0;left:0;right:0;height:calc(68px + env(safe-area-inset-bottom,0px));background:var(--sf);border-top:1px solid var(--bd);display:flex;align-items:center;justify-content:space-around;padding:0 6px;padding-bottom:env(safe-area-inset-bottom,0px);z-index:9999;overflow:visible;}
+body.light .bnav{background:var(--sf);border-top-color:var(--bd);}
+.bnav-btn{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;flex:1;background:none;border:none;cursor:pointer;color:var(--tx3);font-family:var(--fn);font-size:.52rem;font-weight:700;text-transform:uppercase;letter-spacing:.3px;padding:6px 2px;transition:color .18s;-webkit-tap-highlight-color:transparent;}
+.bnav-btn:active{opacity:.7;}.bnav-btn.active{color:var(--ac);}
+.bnav-btn svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.bnav-plus{flex:0 0 56px;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--ac),#00a37a);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(0,200,150,.5);margin-bottom:14px;transform:translateY(-8px);transition:transform .14s,box-shadow .14s;color:#061410;-webkit-tap-highlight-color:transparent;z-index:20;position:relative;}
+.bnav-plus:active{transform:translateY(-6px) scale(.93);}
+.bnav-plus svg{width:24px;height:24px;stroke:currentColor;fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round;}
+
+/* ── MAIN SCROLL ── */
+.wrap{padding:12px 13px;padding-bottom:calc(68px + 16px + env(safe-area-inset-bottom,0px));}
+.tc{display:none;}.tc.active{display:block;}
+
+/* ── CARDS ── */
+.card{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:14px;margin-bottom:10px;}
+.ct{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--tx2);margin-bottom:11px;display:flex;align-items:center;gap:7px;}
+.ctb{width:3px;height:10px;background:var(--ac);border-radius:2px;flex-shrink:0;}
+.ctb.y{background:var(--ac3);}.ctb.b{background:var(--ac2);}.ctb.r{background:var(--er);}
+
+/* ── KPI ── */
+.sg{display:grid;grid-template-columns:repeat(2,1fr);gap:7px;margin-bottom:10px;}
+@media(min-width:500px){.sg{grid-template-columns:repeat(4,1fr);}}
+.kpi{background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:11px 12px;position:relative;overflow:hidden;}
+.kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--r) var(--r) 0 0;}
+.kpi.c-green::before{background:var(--ac);}
+.kpi.c-blue::before{background:var(--ac2);}
+.kpi.c-yellow::before{background:var(--ac3);}
+.kpi.c-red::before{background:var(--er);}
+.kpi.c-purple::before{background:var(--ac4);}
+.kpi.span2{grid-column:span 2;}
+.kv-lbl{font-size:.54rem;color:var(--tx3);font-weight:700;text-transform:uppercase;letter-spacing:.4px;margin-bottom:3px;}
+.kv-val{font-size:1.1rem;font-weight:900;line-height:1;}
+.kv-sub{font-size:.54rem;color:var(--tx3);margin-top:2px;}
+.c-green .kv-val{color:var(--ac);}
+.c-blue .kv-val{color:var(--ac2);}
+.c-yellow .kv-val{color:var(--ac3);}
+.c-red .kv-val{color:var(--er);}
+.c-purple .kv-val{color:var(--ac4);}
+
+/* ── FORMS ── */
+.f{margin-bottom:10px;}
+.fr2{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.f label{display:block;font-size:.8rem;font-weight:700;color:var(--tx);margin-bottom:4px;}
+input,select,textarea{width:100%;background:var(--sf2);border:1.5px solid var(--bd);border-radius:var(--rs);color:var(--tx);font-family:var(--fn);font-size:.97rem;font-weight:500;padding:10px 11px;outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none;}
+input:focus,select:focus,textarea:focus{border-color:var(--ac);box-shadow:0 0 0 3px rgba(0,200,150,.08);}
+input[type=date],input[type=time]{color-scheme:dark;}
+body.light input[type=date],body.light input[type=time]{color-scheme:light;}
+select option{background:#1c2330;}
+textarea{resize:vertical;min-height:58px;}
+.btn{width:100%;background:linear-gradient(135deg,var(--ac),#00a37a);border:none;border-radius:var(--r);color:#061410;font-family:var(--fn);font-size:.9rem;font-weight:800;padding:13px;cursor:pointer;transition:opacity .18s,transform .1s;}
+.btn:active{transform:scale(.98);opacity:.88;}
+.btn.sec{background:var(--sf2);color:var(--tx);border:1.5px solid var(--bd);}
+.btn-row{display:flex;gap:7px;}
+.btn-row .btn{flex:1;}
+.gbtn{background:transparent;border:1.5px solid var(--bd);border-radius:var(--rs);color:var(--tx2);font-family:var(--fn);font-size:.7rem;font-weight:600;padding:6px 11px;cursor:pointer;transition:all .2s;width:auto;}
+.gbtn:hover{border-color:var(--ac2);color:var(--ac2);}
+.gbtn.d:hover{border-color:var(--er);color:var(--er);}
+.gbtn.g:hover{border-color:var(--ac);color:var(--ac);}
+
+/* ── TABLES ── */
+.tw{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:var(--rs);border:1px solid var(--bd);}
+table{width:100%;border-collapse:collapse;font-size:.69rem;}
+thead th{position:sticky;top:0;z-index:5;background:var(--sf2);padding:7px 8px;text-align:right;font-weight:700;color:var(--tx3);font-size:.61rem;text-transform:uppercase;white-space:nowrap;border-bottom:1px solid var(--bd);}
+tbody tr{border-bottom:1px solid rgba(42,53,71,.5);transition:background .12s;}
+tbody tr:last-child{border-bottom:none;}
+tbody tr:hover{background:rgba(0,200,150,.04);}
+tbody td{padding:7px 8px;vertical-align:middle;}
+.mpty{text-align:center;padding:26px 16px;color:var(--tx3);}
+.mpty-i{font-size:1.9rem;margin-bottom:6px;opacity:.3;}
+.badge{display:inline-block;font-size:.57rem;font-weight:700;padding:2px 6px;border-radius:20px;}
+.badge.g{background:rgba(0,200,150,.1);color:var(--ac);}
+.badge.b{background:rgba(59,130,246,.1);color:var(--ac2);}
+.badge.y{background:rgba(245,158,11,.1);color:var(--ac3);}
+.badge.r{background:rgba(239,68,68,.1);color:var(--er);}
+.tact{background:none;border:none;color:var(--tx3);cursor:pointer;padding:5px 6px;border-radius:4px;transition:all .14s;min-width:28px;min-height:28px;display:inline-flex;align-items:center;justify-content:center;font-size:.83rem;}
+.tact.e:hover{color:var(--ac2);background:rgba(59,130,246,.1);}
+.tact.d:hover{color:var(--er);background:rgba(239,68,68,.1);}
+
+/* ── EMPLOYEE CARD (inline expand) ── */
+.emp-item{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);margin-bottom:8px;overflow:hidden;transition:border-color .2s;}
+.emp-header{display:flex;align-items:center;gap:9px;padding:11px 12px;cursor:pointer;user-select:none;}
+.emp-avatar{width:35px;height:35px;border-radius:50%;background:linear-gradient(135deg,var(--ac),var(--ac2));display:flex;align-items:center;justify-content:center;font-size:.83rem;font-weight:800;color:#061410;flex-shrink:0;}
+.emp-name-row{flex:1;min-width:0;}
+.emp-name{font-size:.86rem;font-weight:700;}
+.emp-role{font-size:.6rem;color:var(--tx3);margin-top:2px;}
+.emp-dot{display:inline-block;width:6px;height:6px;border-radius:50%;margin-right:5px;vertical-align:middle;}
+.emp-dot.on{background:var(--ac);}.emp-dot.off{background:var(--tx3);}
+.emp-chev{color:var(--tx3);font-size:.68rem;transition:transform .22s;margin-right:2px;flex-shrink:0;}
+.emp-chev.open{transform:rotate(180deg);}
+.emp-acts{display:flex;gap:2px;align-items:center;}
+/* inline detail panel */
+.worker-detail{display:none;padding:0 12px 12px;}
+.worker-detail.open{display:block;}
+.wd-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-bottom:9px;}
+.wd-k{background:var(--sf3);border-radius:var(--rs);padding:8px;text-align:center;}
+.wd-kv{font-size:.88rem;font-weight:900;}
+.wd-kl{font-size:.57rem;color:var(--tx3);margin-top:2px;}
+.pay-bar-wrap{background:var(--sf3);border-radius:var(--rs);padding:9px 11px;margin-bottom:9px;}
+.pay-bar-track{height:4px;background:var(--sf2);border-radius:3px;margin:5px 0;}
+.pay-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--ac),var(--ac2));}
+.wd-btns{display:flex;gap:6px;margin-bottom:9px;flex-wrap:wrap;}
+
+/* ── MONTH GROUP ── */
+.mg{margin-bottom:6px;border:1px solid var(--bd);border-radius:var(--r);overflow:hidden;}
+.mg-hdr{display:flex;align-items:center;justify-content:space-between;padding:8px 11px;background:var(--sf2);cursor:pointer;user-select:none;}
+.mg-hdr:hover{background:var(--sf3);}
+.mg-title{font-size:.75rem;font-weight:700;}
+.mg-sum{font-size:.72rem;font-weight:700;color:var(--ac);}
+.mg-arr{font-size:.6rem;color:var(--tx3);transition:transform .2s;}
+.mg-arr.open{transform:rotate(180deg);}
+.mg-body{display:none;}.mg-body.open{display:block;}
+.mg-body .tw{border:none;border-radius:0;}
+
+/* ── ESC (dash emp summary) ── */
+.esc{background:var(--sf2);border:1px solid var(--bd);border-radius:var(--rs);padding:10px 12px;margin-bottom:6px;cursor:pointer;transition:border-color .2s;}
+.esc:hover{border-color:var(--ac);}
+.esc.open{border-color:var(--ac);}
+.esc-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:5px;}
+.esc-name{font-size:.83rem;font-weight:700;}
+.esc-amt{font-size:.97rem;font-weight:900;color:var(--ac);}
+.esc-bar{height:3px;background:var(--sf3);border-radius:3px;margin-bottom:5px;}
+.esc-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--ac),var(--ac2));}
+.esc-stats{display:flex;gap:10px;flex-wrap:wrap;}
+.esc-s{font-size:.58rem;color:var(--tx3);}
+.esc-s span{color:var(--tx2);font-weight:600;}
+/* inline detail inside esc */
+.esc-detail{display:none;margin-top:9px;padding-top:9px;border-top:1px solid var(--bd);}
+.esc-detail.open{display:block;}
+
+/* ── BREAK CHIPS ── */
+.bchips{display:flex;gap:6px;margin-top:6px;}
+.bchip{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:8px 6px;border-radius:var(--rs);border:1.5px solid var(--bd);background:var(--sf3);cursor:pointer;font-family:var(--fn);font-size:.72rem;font-weight:700;color:var(--tx3);transition:all .18s;user-select:none;}
+.bchip input[type=radio]{display:none;}
+.bchip.ck-d{background:rgba(0,200,150,.12);border-color:var(--ac);color:var(--ac);}
+.bchip.ck-p{background:rgba(245,158,11,.11);border-color:var(--ac3);color:var(--ac3);}
+.bchip:active{transform:scale(.97);}
+
+/* ── CAT CHIPS ── */
+.cat-chips{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px;}
+.cat-chip{padding:5px 10px;border-radius:20px;border:1.5px solid var(--bd);background:var(--sf2);font-family:var(--fn);font-size:.68rem;font-weight:700;color:var(--tx3);cursor:pointer;transition:all .18s;}
+.cat-chip.active{border-color:var(--ac3);background:rgba(245,158,11,.11);color:var(--ac3);}
+
+/* ── TOGGLE ── */
+.toggle-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;}
+.toggle-sw{position:relative;width:36px;height:20px;flex-shrink:0;}
+.toggle-sw input{opacity:0;width:0;height:0;}
+.toggle-sl{position:absolute;cursor:pointer;inset:0;background:var(--sf3);border-radius:10px;transition:.2s;}
+.toggle-sl:before{content:'';position:absolute;width:14px;height:14px;left:3px;bottom:3px;background:var(--tx3);border-radius:50%;transition:.2s;}
+.toggle-sw input:checked+.toggle-sl{background:var(--ac);}
+.toggle-sw input:checked+.toggle-sl:before{transform:translateX(16px);background:#fff;}
+.toggle-lbl{font-size:.78rem;font-weight:600;color:var(--tx2);}
+
+/* ── COST PREVIEW ── */
+.cost-prev{display:none;background:rgba(0,200,150,.05);border:1px solid rgba(0,200,150,.18);border-radius:var(--rs);padding:9px 12px;margin-bottom:10px;font-size:.77rem;}
+
+/* ── ADD DRAWER — same as modal-overlay ── */
+.add-drawer{position:fixed;inset:0;z-index:490;display:none;align-items:flex-end;justify-content:center;}
+.add-drawer.open{display:flex;}
+.add-bg{position:absolute;inset:0;background:rgba(0,0,0,.55);cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.add-panel{position:relative;z-index:1;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:500px;animation:su .22s ease;max-height:85vh;display:flex;flex-direction:column;}
+.add-panel-scroll{overflow-y:auto;flex:1;padding:16px 15px;padding-bottom:calc(80px + env(safe-area-inset-bottom,0px));}
+@media(min-width:900px){.add-panel{border-radius:var(--r);margin:auto;max-height:90vh;}}
+.add-tabs{display:flex;gap:6px;margin-bottom:13px;}
+.add-tab{flex:1;padding:9px;border-radius:var(--rs);border:1.5px solid var(--bd);background:var(--sf2);font-family:var(--fn);font-size:.76rem;font-weight:700;color:var(--tx3);cursor:pointer;text-align:center;transition:all .18s;}
+.add-tab.active{border-color:var(--ac);background:rgba(0,200,150,.09);color:var(--ac);}
+
+/* ── SETTINGS ── */
+.settings-drawer{position:fixed;inset:0;z-index:600;display:none;align-items:flex-end;justify-content:center;}
+.settings-drawer.open{display:flex;}
+.set-bg{position:absolute;inset:0;background:rgba(0,0,0,.55);cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.set-panel{position:relative;z-index:1;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:500px;padding:18px 16px calc(80px + env(safe-area-inset-bottom,0px));animation:su .22s ease;max-height:85vh;overflow-y:auto;}
+.set-title{font-size:.9rem;font-weight:800;margin-bottom:12px;}
+.theme-row{display:flex;gap:8px;margin-bottom:4px;}
+.theme-opt{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:10px;border-radius:var(--rs);border:1.5px solid var(--bd);background:var(--sf2);cursor:pointer;font-family:var(--fn);font-size:.77rem;font-weight:700;color:var(--tx2);transition:all .18s;}
+.theme-opt.active{border-color:var(--ac);color:var(--ac);background:rgba(0,200,150,.09);}
+
+/* ── MODAL ── */
+.modal-overlay{position:fixed;inset:0;z-index:550;display:none;align-items:flex-end;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-bg{position:absolute;inset:0;background:rgba(0,0,0,.6);cursor:pointer;-webkit-tap-highlight-color:transparent;}
+.modal{position:relative;z-index:1;background:var(--sf);border:1px solid var(--bd);border-radius:var(--r) var(--r) 0 0;width:100%;max-width:490px;padding:17px 15px calc(80px + env(safe-area-inset-bottom,0px));animation:su .22s ease;max-height:85vh;overflow-y:auto;}
+@media(min-width:500px){.modal{border-radius:var(--r);margin:auto;}}
+.modal-title{font-size:.92rem;font-weight:800;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between;}
+.modal-close{background:none;border:none;color:var(--tx3);cursor:pointer;font-size:1.1rem;padding:2px 6px;border-radius:6px;}
+.modal-close:hover{color:var(--tx);}
+
+/* ── CAT MANAGER MODAL ── */
+.cat-mgr-item{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--bd);}
+.cat-mgr-item:last-child{border-bottom:none;}
+.cat-mgr-name{flex:1;font-size:.82rem;}
+
+/* ── MISC ── */
+.sec-lbl{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--tx3);margin-bottom:7px;}
+.divider{height:1px;background:var(--bd);margin:12px 0;}
+.toast{position:fixed;bottom:calc(68px + 8px + env(safe-area-inset-bottom,0px));left:50%;transform:translateX(-50%) translateY(20px);background:var(--sf);border:1px solid var(--bd);border-radius:var(--r);padding:10px 18px;font-size:.8rem;font-weight:600;z-index:9999;opacity:0;transition:all .28s;pointer-events:none;box-shadow:0 8px 24px rgba(0,0,0,.3);white-space:nowrap;}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+.toast.ok{border-color:var(--ac);color:var(--ac);}
+.toast.err{border-color:var(--er);color:var(--er);}
+@keyframes su{from{transform:translateY(26px);opacity:0}to{transform:translateY(0);opacity:1}}
+</style>
+</head>
+<body>
+
+<!-- HEADER (always visible, tabs inside) -->
+<div class="hdr">
+  <div class="hdr-top">
+    <div>
+      <div class="hdr-t">ניהול <span>שיפוץ</span></div>
+      <div class="hdr-s">הוצאות, עובדים ומשכורות</div>
+    </div>
+    <div style="display:flex;gap:4px;">
+      <button class="hico" onclick="openSettings()"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></button>
+    </div>
+  </div>
+
+</div>
+
+<!-- MAIN SCROLL AREA -->
+<div class="wrap" id="mainWrap">
+
+  <!-- ════ DASHBOARD ════ -->
+  <div class="tc active" id="tc-dash">
+    <div class="sg" id="dashKpi"></div>
+    <div class="card">
+      <div class="ct"><div class="ctb y"></div>הוצאות לפי קטגוריה</div>
+      <div id="dashCatList"></div>
+    </div>
+    <div class="card">
+      <div class="ct"><div class="ctb"></div>סיכום עובדים — לחץ לפירוט</div>
+      <div id="dashEmpList"></div>
+    </div>
+  </div>
+
+  <!-- ════ EXPENSES ════ -->
+  <div class="tc" id="tc-expenses">
+    <div class="card">
+      <div class="ct"><div class="ctb y"></div>רשומות הוצאות</div>
+      <div style="display:flex;gap:7px;margin-bottom:9px;flex-wrap:wrap;">
+        <div style="flex:1;min-width:130px;position:relative;"><input type="text" id="expSearch" placeholder="חיפוש..." oninput="renderExpenses()" style="padding-right:30px;"><span style="position:absolute;right:9px;top:50%;transform:translateY(-50%);color:var(--tx3);pointer-events:none;font-size:.85rem;">🔍</span></div>
+        <select id="expCatFilter" style="width:auto;flex:1;min-width:110px;" onchange="renderExpenses()"><option value="">כל הקטגוריות</option></select>
+      </div>
+      <div id="expContainer"></div>
+    </div>
+    <div class="card">
+      <div class="ct"><div class="ctb"></div>טבלת שכר עובדים</div>
+      <div id="wagesContainer"></div>
+    </div>
+  </div>
+
+  <!-- ════ WORKERS ════ -->
+  <div class="tc" id="tc-workers">
+    <div class="card">
+      <div class="ct"><div class="ctb"></div>הוספת עובד</div>
+      <div class="fr2">
+        <div class="f"><label>שם</label><input type="text" id="wName" placeholder="שם מלא"></div>
+        <div class="f"><label>תפקיד</label><input type="text" id="wRole" placeholder="נגר, חשמלאי..."></div>
+      </div>
+      <div class="fr2">
+        <div class="f"><label>מחיר לשעה (₪)</label><input type="number" id="wRate" placeholder="0" min="0" step="0.5"></div>
+        <div class="f"><label>טלפון</label><input type="tel" id="wPhone" placeholder="050-0000000"></div>
+      </div>
+      <button class="btn" onclick="addWorker()">הוסף עובד</button>
+    </div>
+    <div class="card">
+      <div class="ct"><div class="ctb"></div>רשימת עובדים</div>
+      <div style="position:relative;margin-bottom:9px;"><input type="text" id="wSearch" placeholder="חיפוש..." oninput="renderWorkers()" style="padding-right:30px;"><span style="position:absolute;right:9px;top:50%;transform:translateY(-50%);color:var(--tx3);pointer-events:none;font-size:.85rem;">🔍</span></div>
+      <div id="workerList"></div>
+    </div>
+  </div>
+
+  <!-- ════ REPORTS ════ -->
+  <div class="tc" id="tc-reports">
+    <div class="card">
+      <div class="ct"><div class="ctb"></div>סינון דוח</div>
+      <div class="fr2">
+        <div class="f"><label>סוג</label><select id="repType"><option value="all">הכל</option><option value="expenses">הוצאות בלבד</option><option value="wages">משכורות בלבד</option></select></div>
+        <div class="f"><label>עובד</label><select id="repWorker"><option value="">כל העובדים</option></select></div>
+      </div>
+      <div class="fr2">
+        <div class="f"><label>קטגוריה</label><select id="repCat"><option value="">כל הקטגוריות</option></select></div>
+        <div class="f"><label>שנה</label><select id="repYear"><option value="">כל השנים</option></select></div>
+      </div>
+      <div class="fr2">
+        <div class="f"><label>מתאריך</label><input type="date" id="repFrom"></div>
+        <div class="f"><label>עד תאריך</label><input type="date" id="repTo"></div>
+      </div>
+      <div class="btn-row">
+        <button class="btn" onclick="genReport()">הפק דוח</button>
+        <button class="btn sec" id="pdfBtn" style="display:none;" onclick="exportPDF()">PDF ייצא</button>
+      </div>
+    </div>
+    <div id="reportOut"></div>
+  </div>
+
+</div><!-- /wrap -->
+
+<!-- ════ ADD DRAWER ════ -->
+<div class="add-drawer" id="addDrawer">
+  <div class="add-bg" onclick="closeAddDrawer()"></div>
+  <div class="add-panel">
+    <div class="add-panel-scroll">
+      <div style="font-size:.88rem;font-weight:800;margin-bottom:11px;">➕ הוספת רשומה</div>
+      <div class="add-tabs">
+        <div class="add-tab active" id="addTabExp" onclick="switchAddTab('exp')">💸 הוצאה</div>
+        <div class="add-tab" id="addTabHrs" onclick="switchAddTab('hrs')">🕐 משמרת</div>
+      </div>
+      <!-- EXPENSE -->
+      <div id="addExpForm">
+        <div class="f"><label>קטגוריה</label>
+          <div class="cat-chips" id="catChips"></div>
+          <input type="text" id="expCatCustom" placeholder="קטגוריה אחרת..." style="margin-top:6px;display:none;">
+        </div>
+        <div class="fr2">
+          <div class="f"><label>סכום (₪)</label><input type="number" id="expAmt" placeholder="0" min="0" step="0.01" oninput="updateExpPreview()"></div>
+          <div class="f"><label>תאריך</label><input type="date" id="expDate"></div>
+        </div>
+        <div class="f"><label>ספק / תיאור</label><input type="text" id="expDesc" placeholder="שם ספק, חנות..."></div>
+        <div class="f"><label>הערות</label><textarea id="expNotes" placeholder="אופציונלי..."></textarea></div>
+        <div id="expPreview" class="cost-prev"><span style="color:var(--tx3);">סכום: </span><span id="expPreviewAmt" style="font-weight:800;color:var(--ac3);font-size:.98rem;"></span></div>
+        <button class="btn" onclick="addExpense()">שמור הוצאה</button>
+      </div>
+      <!-- HOURS -->
+      <div id="addHrsForm" style="display:none;">
+        <div class="f"><label>עובד</label><select id="hrsWorker" onchange="updateHrsPreview()"><option value="">— בחר עובד —</option></select></div>
+        <div class="fr2">
+          <div class="f"><label>תאריך</label><input type="date" id="hrsDate"></div>
+          <div class="f"><label>שעות <span style="color:var(--tx3);font-size:.6rem;">(אופציונלי)</span></label><input type="number" id="hrsHours" placeholder="יחושב אוטו'" min="0" step="0.25" oninput="updateHrsPreview()"></div>
+        </div>
+        <div class="fr2">
+          <div class="f"><label>שעת התחלה</label><input type="time" id="hrsStart" onchange="calcHrsFromTime()"></div>
+          <div class="f"><label>שעת סיום <span style="color:var(--tx3);font-size:.58rem;">ניתן מאוחר יותר</span></label><input type="time" id="hrsEnd" onchange="calcHrsFromTime()"></div>
+        </div>
+        <div class="f">
+          <div class="toggle-row"><label class="toggle-sw"><input type="checkbox" id="hrsBreakEnable" checked onchange="toggleBreak()"><span class="toggle-sl"></span></label><span class="toggle-lbl">כלול הפסקה</span></div>
+          <div id="hrsBreakWrap">
+            <input type="number" id="hrsBreak" value="30" min="0" step="5" oninput="calcHrsFromTime();updateHrsPreview();">
+            <div class="bchips">
+              <label class="bchip ck-d" id="bchipD" onclick="selBC('deduct')"><input type="radio" name="bm" id="bmD" value="deduct" checked>✂️ הורד משכר</label>
+              <label class="bchip" id="bchipP" onclick="selBC('partial')"><input type="radio" name="bm" id="bmP" value="partial">💰 שולמה</label>
+            </div>
+          </div>
+        </div>
+        <div class="f"><label>תיאור עבודה</label><input type="text" id="hrsDesc" placeholder="מה בוצע?"></div>
+        <div id="hrsPreview" class="cost-prev"><span style="color:var(--tx3);">עלות: </span><span id="hrsPreviewAmt" style="font-weight:800;color:var(--ac);font-size:.95rem;"></span></div>
+        <button class="btn" onclick="addHoursEntry()">שמור משמרת</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL: עריכת הוצאה -->
+<div class="modal-overlay" id="editExpModal">
+  <div class="modal-bg" onclick="closeModal('editExpModal')"></div>
+  <div class="modal">
+    <div class="modal-title">עריכת הוצאה <button class="modal-close" onclick="closeModal('editExpModal')">✕</button></div>
+    <input type="hidden" id="eeId">
+    <div class="fr2"><div class="f"><label>קטגוריה</label><input type="text" id="eeCat"></div><div class="f"><label>סכום</label><input type="number" id="eeAmt" min="0" step="0.01"></div></div>
+    <div class="f"><label>תאריך</label><input type="date" id="eeDate"></div>
+    <div class="f"><label>ספק/תיאור</label><input type="text" id="eeDesc"></div>
+    <div class="f"><label>הערות</label><textarea id="eeNotes"></textarea></div>
+    <div class="btn-row"><button class="btn sec" onclick="closeModal('editExpModal')">ביטול</button><button class="btn" onclick="saveEditExp()">שמור</button></div>
+  </div>
+</div>
+
+<!-- MODAL: עריכת עובד -->
+<div class="modal-overlay" id="editWorkerModal">
+  <div class="modal-bg" onclick="closeModal('editWorkerModal')"></div>
+  <div class="modal">
+    <div class="modal-title">עריכת עובד <button class="modal-close" onclick="closeModal('editWorkerModal')">✕</button></div>
+    <input type="hidden" id="ewId">
+    <div class="fr2"><div class="f"><label>שם</label><input type="text" id="ewName"></div><div class="f"><label>תפקיד</label><input type="text" id="ewRole"></div></div>
+    <div class="fr2"><div class="f"><label>מחיר לשעה</label><input type="number" id="ewRate" min="0" step="0.5"></div><div class="f"><label>טלפון</label><input type="tel" id="ewPhone"></div></div>
+    <div class="f"><label>סטטוס</label><select id="ewStatus"><option value="active">פעיל</option><option value="inactive">לא פעיל</option></select></div>
+    <div class="btn-row"><button class="btn sec" onclick="closeModal('editWorkerModal')">ביטול</button><button class="btn" onclick="saveEditWorker()">שמור</button></div>
+  </div>
+</div>
+
+<!-- MODAL: עריכת משמרת -->
+<div class="modal-overlay" id="editHrsModal">
+  <div class="modal-bg" onclick="closeModal('editHrsModal')"></div>
+  <div class="modal">
+    <div class="modal-title">עריכת משמרת <button class="modal-close" onclick="closeModal('editHrsModal')">✕</button></div>
+    <input type="hidden" id="ehId"><input type="hidden" id="ehWid">
+    <div class="f"><label>עובד</label><select id="ehWorker"></select></div>
+    <div class="fr2"><div class="f"><label>תאריך</label><input type="date" id="ehDate"></div><div class="f"><label>שעות</label><input type="number" id="ehHours" min="0" step="0.25"></div></div>
+    <div class="fr2"><div class="f"><label>שעת התחלה</label><input type="time" id="ehStart" onchange="calcEhFromTime()"></div><div class="f"><label>שעת סיום</label><input type="time" id="ehEnd" onchange="calcEhFromTime()"></div></div>
+    <div class="f"><label>הפסקה (דקות)</label><input type="number" id="ehBreak" min="0" step="5" oninput="calcEhFromTime()">
+      <div class="bchips"><label class="bchip ck-d" id="ehChipD" onclick="selBCE('deduct')"><input type="radio" name="ebm" id="ebmD" value="deduct" checked>✂️ הורד משכר</label><label class="bchip" id="ehChipP" onclick="selBCE('partial')"><input type="radio" name="ebm" id="ebmP" value="partial">💰 שולמה</label></div>
+    </div>
+    <div class="f"><label>תיאור</label><input type="text" id="ehDesc"></div>
+    <div class="btn-row"><button class="btn sec" onclick="closeModal('editHrsModal')">ביטול</button><button class="btn" onclick="saveEditHrs()">שמור</button></div>
+  </div>
+</div>
+
+<!-- MODAL: תשלום -->
+<div class="modal-overlay" id="payModal">
+  <div class="modal-bg" onclick="closeModal('payModal')"></div>
+  <div class="modal">
+    <div class="modal-title" id="payModalTitle">רישום תשלום <button class="modal-close" onclick="closeModal('payModal')">✕</button></div>
+    <input type="hidden" id="payWid">
+    <div id="payBalance" style="margin-bottom:11px;padding:9px 11px;background:var(--sf2);border-radius:var(--rs);font-size:.8rem;line-height:1.6;"></div>
+    <div class="f"><label>סכום (₪)</label><input type="number" id="payAmt" placeholder="0" min="0" step="0.01"></div>
+    <div class="f"><label>תאריך</label><input type="date" id="payDate"></div>
+    <div class="f"><label>הערה</label><input type="text" id="payNote" placeholder="שיק, העברה, מזומן..."></div>
+    <div class="btn-row"><button class="btn sec" onclick="closeModal('payModal')">ביטול</button><button class="btn" onclick="savePay()">שמור</button></div>
+  </div>
+</div>
+
+<!-- MODAL: ניהול קטגוריות -->
+<div class="modal-overlay" id="catModal">
+  <div class="modal-bg" onclick="closeModal('catModal')"></div>
+  <div class="modal">
+    <div class="modal-title">ניהול קטגוריות <button class="modal-close" onclick="closeModal('catModal')">✕</button></div>
+    <div id="catMgrList"></div>
+    <div style="display:flex;gap:7px;margin-top:12px;">
+      <input type="text" id="newCatInput" placeholder="קטגוריה חדשה..." style="flex:1;">
+      <button class="btn" onclick="addCat()" style="width:auto;padding:10px 14px;font-size:.8rem;">הוסף</button>
+    </div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="settings-drawer" id="settingsDrawer">
+  <div class="set-bg" onclick="closeSettings()"></div>
+  <div class="set-panel">
+    <div class="set-title">⚙️ הגדרות</div>
+    <div class="sec-lbl">ערכת נושא</div>
+    <div class="theme-row" style="margin-bottom:14px;"><button class="theme-opt" id="tDark" onclick="setTheme('dark')">🌙 כהה</button><button class="theme-opt" id="tLight" onclick="setTheme('light')">☀️ בהיר</button></div>
+    <div class="divider"></div>
+    <div class="sec-lbl">קטגוריות</div>
+    <button class="gbtn g" onclick="openCatModal()" style="margin-bottom:14px;">✏️ ערוך קטגוריות</button>
+    <div class="divider"></div>
+    <div class="sec-lbl">נתונים</div>
+    <div style="display:flex;gap:7px;flex-wrap:wrap;">
+      <button class="gbtn" onclick="exportData()">ייצוא JSON</button>
+      <button class="gbtn" onclick="document.getElementById('importFile').click()">ייבוא JSON</button>
+      <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(event)">
+    </div>
+    <div style="margin-top:8px;"><button class="gbtn d" onclick="clearAll()">מחק הכל</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ══════════════════════════════════
+// STATE
+// ══════════════════════════════════
+let workers=[],hoursLog=[],expenses=[],payments=[];
+let cats=['חומרים','כלים וציוד','שרברבות','חשמל','ריצוף','גבס/טיח','צבע','נגרות','אחר'];
+
+function save(){
+  localStorage.setItem('rv_w',JSON.stringify(workers));
+  localStorage.setItem('rv_h',JSON.stringify(hoursLog));
+  localStorage.setItem('rv_e',JSON.stringify(expenses));
+  localStorage.setItem('rv_p',JSON.stringify(payments));
+  localStorage.setItem('rv_cats',JSON.stringify(cats));
+}
+function load(){
+  try{workers=JSON.parse(localStorage.getItem('rv_w')||'[]');}catch(e){workers=[];}
+  try{hoursLog=JSON.parse(localStorage.getItem('rv_h')||'[]');}catch(e){hoursLog=[];}
+  try{expenses=JSON.parse(localStorage.getItem('rv_e')||'[]');}catch(e){expenses=[];}
+  try{payments=JSON.parse(localStorage.getItem('rv_p')||'[]');}catch(e){payments=[];}
+  try{const s=localStorage.getItem('rv_cats');if(s)cats=JSON.parse(s);}catch(e){}
+}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2,5);
+
+// ══════════════════════════════════
+// HELPERS
+// ══════════════════════════════════
+const fmtNIS=v=>'₪'+Number(v).toLocaleString('he-IL',{minimumFractionDigits:0,maximumFractionDigits:0});
+const fmtH=v=>{const h=Math.floor(v),m=Math.round((v-h)*60);return m?`${h}:${String(m).padStart(2,'0')}`:`${h}:00`;};
+const HM=['ינואר','פברואר','מרץ','אפריל','מאי','יוני','יולי','אוגוסט','ספטמבר','אוקטובר','נובמבר','דצמבר'];
+const getYM=d=>d?d.slice(0,7):'';
+const mlbl=ym=>{const[y,m]=ym.split('-');return HM[+m-1]+' '+y;};
+const fmtDate=d=>{if(!d)return'—';const[y,m,day]=d.split('-');return`${day}/${m}/${y}`;};
+const todayStr=()=>{const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');};
+const getWorker=id=>workers.find(w=>w.id===id)||null;
+const calcNet=(gross,bm,mode)=>mode==='deduct'?Math.max(0,gross-bm/60):gross;
+const TYPE_L={regular:'רגיל',overtime:'שע"נ',holiday:'חג',remote:'מרחוק'};
+const workerOwed=wid=>hoursLog.filter(h=>h.wid===wid).reduce((s,h)=>s+h.cost,0);
+const workerPaid=wid=>payments.filter(p=>p.wid===wid).reduce((s,p)=>s+p.amt,0);
+// which shift IDs are "paid" for a worker (covered by payments, from oldest shift first)
+function paidShiftIds(wid){
+  const shifts=[...hoursLog.filter(h=>h.wid===wid)].sort((a,b)=>a.date.localeCompare(b.date));
+  let budget=workerPaid(wid);
+  const paid=new Set();
+  for(const s of shifts){if(budget>=s.cost){paid.add(s.id);budget-=s.cost;}else break;}
+  return paid;
+}
+
+// ══════════════════════════════════
+// TABS — scroll to top on switch
+// ══════════════════════════════════
+function closeAllOverlays(){
+  closeAddDrawer();
+  closeSettings();
+  document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
+}
+function showTab(tab,btn,bnId){
+  closeAllOverlays();
+  document.querySelectorAll('.tc').forEach(t=>t.classList.remove('active'));
+  document.getElementById('tc-'+tab).classList.add('active');
+  // sync bottom nav
+  document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active'));
+  if(bnId) document.getElementById(bnId)?.classList.add('active');
+  // scroll to top
+  window.scrollTo(0,0);
+  document.getElementById('mainWrap').scrollTop=0;
+  document.documentElement.scrollTop=0;
+  if(tab==='dash') renderDash();
+  if(tab==='expenses'){renderExpenses();renderWages();}
+  if(tab==='workers') renderWorkers();
+  if(tab==='reports') populateRepFilters();
+}
+
+// ══════════════════════════════════
+// THEME
+// ══════════════════════════════════
+function setTheme(t){document.body.classList.toggle('light',t==='light');localStorage.setItem('rv_theme',t);syncTheme();}
+function syncTheme(){const t=localStorage.getItem('rv_theme')||'dark';document.getElementById('tDark').classList.toggle('active',t==='dark');document.getElementById('tLight').classList.toggle('active',t==='light');}
+function openSettings(){document.getElementById('settingsDrawer').classList.add('open');syncTheme();}
+function closeSettings(){document.getElementById('settingsDrawer').classList.remove('open');}
+
+// ══════════════════════════════════
+// TOAST
+// ══════════════════════════════════
+let _tt;
+function toast(msg,type='ok'){const el=document.getElementById('toast');el.textContent=msg;el.className='toast '+type+' show';clearTimeout(_tt);_tt=setTimeout(()=>el.classList.remove('show'),2600);}
+
+// ══════════════════════════════════
+// MODALS
+// ══════════════════════════════════
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+// ══════════════════════════════════
+// ADD DRAWER
+// ══════════════════════════════════
+function toggleAddDrawer(){
+  const d=document.getElementById('addDrawer');
+  if(d.classList.contains('open')){closeAddDrawer();}else{closeSettings();document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));openAddDrawer();}
+}
+function openAddDrawer(tab,wid){
+  switchAddTab(tab||'exp');
+  renderCatChips();
+  if(wid){setTimeout(()=>{document.getElementById('hrsWorker').value=wid;updateHrsPreview();},50);}
+  document.getElementById('addDrawer').classList.add('open');
+}
+function closeAddDrawer(){document.getElementById('addDrawer').classList.remove('open');}
+function switchAddTab(t){
+  document.getElementById('addTabExp').classList.toggle('active',t==='exp');
+  document.getElementById('addTabHrs').classList.toggle('active',t==='hrs');
+  document.getElementById('addExpForm').style.display=t==='exp'?'':'none';
+  document.getElementById('addHrsForm').style.display=t==='hrs'?'':'none';
+}
+
+// ══════════════════════════════════
+// CATEGORIES
+// ══════════════════════════════════
+let _selCat=null;
+function renderCatChips(){
+  if(!_selCat||!cats.includes(_selCat))_selCat=cats[0];
+  document.getElementById('catChips').innerHTML=cats.map((c,i)=>`<div class="cat-chip${_selCat===c?' active':''}" onclick="selCatByIndex(${i})">${c}</div>`).join('');
+  document.getElementById('expCatCustom').style.display=_selCat==='אחר'?'':'none';
+}
+function selCatByIndex(i){_selCat=cats[i];renderCatChips();}
+function selCat(c){_selCat=c;renderCatChips();}
+function getExpCat(){return _selCat==='אחר'?(document.getElementById('expCatCustom').value.trim()||'אחר'):(_selCat||cats[0]);}
+function openCatModal(){closeSettings();renderCatMgr();openModal('catModal');}
+function renderCatMgr(){
+  document.getElementById('catMgrList').innerHTML=cats.map((c,i)=>`<div class="cat-mgr-item"><span class="cat-mgr-name">${c}</span><button class="tact d" onclick="delCat(${i})" title="מחק">✕</button></div>`).join('')||'<div style="color:var(--tx3);font-size:.8rem;">אין קטגוריות</div>';
+}
+function addCat(){const v=document.getElementById('newCatInput').value.trim();if(!v)return;if(cats.includes(v)){toast('קיימת כבר','err');return;}cats.push(v);save();renderCatMgr();renderCatChips();document.getElementById('newCatInput').value='';toast('נוספה ✓');}
+function delCat(i){if(cats.length<=1){toast('חייבת להישאר אחת','err');return;}cats.splice(i,1);save();renderCatMgr();renderCatChips();}
+
+// ══════════════════════════════════
+// EXPENSES
+// ══════════════════════════════════
+function addExpense(){
+  const amt=parseFloat(document.getElementById('expAmt').value);
+  const date=document.getElementById('expDate').value;
+  if(isNaN(amt)||amt<=0){toast('נא להזין סכום','err');return;}
+  if(!date){toast('נא לבחור תאריך','err');return;}
+  expenses.push({id:uid(),cat:getExpCat(),amt,date,desc:document.getElementById('expDesc').value.trim(),notes:document.getElementById('expNotes').value.trim(),createdAt:new Date().toISOString()});
+  save();['expAmt','expDesc','expNotes'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('expPreview').style.display='none';_selCat=cats[0];renderCatChips();
+  toast('הוצאה נשמרה ✓');closeAddDrawer();renderExpenses();renderDash();
+}
+function updateExpPreview(){const a=parseFloat(document.getElementById('expAmt').value);const el=document.getElementById('expPreview');if(a>0){el.style.display='block';document.getElementById('expPreviewAmt').textContent=fmtNIS(a);}else el.style.display='none';}
+function renderExpenses(){
+  const q=document.getElementById('expSearch').value.toLowerCase();
+  const cf=document.getElementById('expCatFilter').value;
+  let data=expenses.filter(e=>{if(cf&&e.cat!==cf)return false;if(q&&!(e.cat+e.desc+(e.notes||'')).toLowerCase().includes(q))return false;return true;}).sort((a,b)=>b.date.localeCompare(a.date));
+  const allCats=[...new Set(expenses.map(e=>e.cat))].sort();
+  document.getElementById('expCatFilter').innerHTML=`<option value="">כל הקטגוריות</option>`+allCats.map(c=>`<option value="${c}"${cf===c?' selected':''}>${c}</option>`).join('');
+  const cont=document.getElementById('expContainer');
+  if(!data.length){cont.innerHTML=`<div class="mpty"><div class="mpty-i">💸</div>אין הוצאות</div>`;return;}
+  const grps={};data.forEach(e=>{const ym=getYM(e.date);(grps[ym]=grps[ym]||[]).push(e);});
+  cont.innerHTML=Object.keys(grps).sort().reverse().map((ym,gi)=>{
+    const rows=grps[ym],tot=rows.reduce((s,e)=>s+e.amt,0);
+    return`<div class="mg"><div class="mg-hdr" onclick="toggleMG(this)"><span class="mg-title">${mlbl(ym)}</span><span style="display:flex;align-items:center;gap:7px;"><span style="font-size:.62rem;color:var(--tx3);">${rows.length} רשומות</span><span class="mg-sum">${fmtNIS(tot)}</span><span class="mg-arr ${gi===0?'open':''}">▼</span></span></div>
+    <div class="mg-body ${gi===0?'open':''}"><div class="tw"><table><thead><tr><th>קטגוריה</th><th>תאריך</th><th>ספק</th><th>סכום</th><th></th></tr></thead><tbody>${rows.map(e=>`<tr><td><span class="badge y">${e.cat}</span></td><td style="white-space:nowrap;">${fmtDate(e.date)}</td><td style="color:var(--tx2);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.desc||'—'}</td><td style="font-weight:700;color:var(--ac3);white-space:nowrap;">${fmtNIS(e.amt)}</td><td style="white-space:nowrap;"><button class="tact e" onclick="openEditExp('${e.id}')">✏️</button><button class="tact d" onclick="delExp('${e.id}')">🗑</button></td></tr>`).join('')}</tbody></table></div></div></div>`;
+  }).join('');
+}
+function openEditExp(id){const e=expenses.find(x=>x.id===id);if(!e)return;document.getElementById('eeId').value=id;document.getElementById('eeCat').value=e.cat;document.getElementById('eeAmt').value=e.amt;document.getElementById('eeDate').value=e.date;document.getElementById('eeDesc').value=e.desc||'';document.getElementById('eeNotes').value=e.notes||'';openModal('editExpModal');}
+function saveEditExp(){const id=document.getElementById('eeId').value;const e=expenses.find(x=>x.id===id);if(!e)return;const amt=parseFloat(document.getElementById('eeAmt').value);if(isNaN(amt)||amt<=0){toast('סכום לא תקין','err');return;}Object.assign(e,{cat:document.getElementById('eeCat').value.trim(),amt,date:document.getElementById('eeDate').value,desc:document.getElementById('eeDesc').value.trim(),notes:document.getElementById('eeNotes').value.trim()});save();closeModal('editExpModal');toast('עודכן ✓');renderExpenses();renderDash();}
+function delExp(id){if(!confirm('למחוק?'))return;expenses=expenses.filter(e=>e.id!==id);save();renderExpenses();renderDash();toast('נמחק');}
+
+// ══════════════════════════════════
+// WAGES TABLE
+// ══════════════════════════════════
+function renderWages(){
+  const el=document.getElementById('wagesContainer');
+  if(!hoursLog.length){el.innerHTML=`<div class="mpty"><div class="mpty-i">👷</div>אין משמרות</div>`;return;}
+  const wids=[...new Set(hoursLog.map(h=>h.wid))];
+  const rows=wids.map(id=>{const owed=workerOwed(id),paid=workerPaid(id);return{w:getWorker(id),h:hoursLog.filter(r=>r.wid===id).reduce((s,r)=>s+r.hours,0),hNet:hoursLog.filter(r=>r.wid===id).reduce((s,r)=>s+(r.hoursNet!==undefined?r.hoursNet:r.hours),0),owed,paid,rem:owed-paid};}).sort((a,b)=>b.owed-a.owed);
+  const tot=rows.reduce((s,r)=>s+r.owed,0),totP=rows.reduce((s,r)=>s+r.paid,0);
+  el.innerHTML=`<div class="tw"><table><thead><tr><th>עובד</th><th>שעות</th><th>לתשלום</th><th>שולם</th><th>נשאר</th></tr></thead><tbody>${rows.map(r=>`<tr><td style="font-weight:700;">${r.w?r.w.name:'—'}</td><td>${fmtH(r.h)}</td><td style="color:var(--ac3);">${fmtNIS(r.owed)}</td><td style="color:var(--ac);">${fmtNIS(r.paid)}</td><td style="font-weight:700;color:${r.rem>0?'var(--er)':'var(--ac)'};">${fmtNIS(r.rem)}</td></tr>`).join('')}<tr style="border-top:2px solid var(--bd);"><td style="font-weight:700;color:var(--tx2);">סה"כ</td><td></td><td style="color:var(--ac3);font-weight:700;">${fmtNIS(tot)}</td><td style="color:var(--ac);font-weight:700;">${fmtNIS(totP)}</td><td style="font-weight:900;color:var(--er);">${fmtNIS(tot-totP)}</td></tr></tbody></table></div>`;
+}
+
+// ══════════════════════════════════
+// WORKERS
+// ══════════════════════════════════
+function addWorker(){
+  const name=document.getElementById('wName').value.trim();
+  const rate=parseFloat(document.getElementById('wRate').value);
+  if(!name){toast('נא להזין שם','err');return;}
+  if(isNaN(rate)||rate<0){toast('נא להזין מחיר לשעה','err');return;}
+  workers.push({id:uid(),name,role:document.getElementById('wRole').value.trim(),rate,phone:document.getElementById('wPhone').value.trim(),status:'active',createdAt:new Date().toISOString()});
+  save();['wName','wRole','wRate','wPhone'].forEach(i=>document.getElementById(i).value='');
+  toast('עובד נוסף ✓');renderWorkers();populateWorkerSelects();
+}
+
+let _openWorker=null;
+function renderWorkers(){
+  const q=document.getElementById('wSearch').value.toLowerCase();
+  const list=document.getElementById('workerList');
+  const fl=workers.filter(w=>w.name.toLowerCase().includes(q)||(w.role||'').toLowerCase().includes(q));
+  if(!fl.length){list.innerHTML=`<div class="mpty"><div class="mpty-i">👷</div>אין עובדים</div>`;return;}
+  list.innerHTML=fl.map(w=>{
+    const init=w.name.split(' ').map(n=>n[0]).join('').slice(0,2).toUpperCase();
+    return`<div class="emp-item" id="emp-${w.id}">
+      <div class="emp-header" onclick="toggleWorker('${w.id}')">
+        <div class="emp-avatar">${init}</div>
+        <div class="emp-name-row"><div class="emp-name"><span class="emp-dot ${w.status==='active'?'on':'off'}"></span>${w.name}</div><div class="emp-role">${w.role||'ללא תפקיד'}</div></div>
+        <div class="emp-acts">
+          <button class="tact e" onclick="event.stopPropagation();openEditWorker('${w.id}')">✏️</button>
+          <button class="tact d" onclick="event.stopPropagation();delWorker('${w.id}')">🗑</button>
+          <span class="emp-chev" id="chev-${w.id}">▼</span>
+        </div>
+      </div>
+      <div class="worker-detail" id="wd-${w.id}"></div>
+    </div>`;
+  }).join('');
+  // re-open if was open
+  if(_openWorker&&document.getElementById('wd-'+_openWorker)){renderWorkerDetail(_openWorker,false);}
+}
+function toggleWorker(id){
+  if(_openWorker===id){closeWorkerDetail(id);return;}
+  if(_openWorker) closeWorkerDetail(_openWorker);
+  _openWorker=id;
+  document.getElementById('chev-'+id)?.classList.add('open');
+  renderWorkerDetail(id,true);
+}
+function closeWorkerDetail(id){
+  document.getElementById('wd-'+id)?.classList.remove('open');
+  document.getElementById('chev-'+id)?.classList.remove('open');
+  if(_openWorker===id)_openWorker=null;
+}
+function renderWorkerDetail(id,scroll){
+  const w=getWorker(id);if(!w)return;
+  const logs=hoursLog.filter(h=>h.wid===id).sort((a,b)=>b.date.localeCompare(a.date));
+  const totH=logs.reduce((s,h)=>s+h.hours,0);
+  const owed=workerOwed(id),paid=workerPaid(id),rem=owed-paid;
+  const paidIds=paidShiftIds(id);
+  const pays=payments.filter(p=>p.wid===id).sort((a,b)=>b.date.localeCompare(a.date));
+
+  // group by month
+  const grps={};logs.forEach(h=>{const ym=getYM(h.date);(grps[ym]=grps[ym]||[]).push(h);});
+  const logHtml=Object.keys(grps).length?Object.keys(grps).sort().reverse().map((ym,gi)=>{
+    const rows=grps[ym],mH=rows.reduce((s,h)=>s+h.hours,0),mC=rows.reduce((s,h)=>s+h.cost,0);
+    return`<div class="mg"><div class="mg-hdr" onclick="toggleMG(this)"><span class="mg-title">${mlbl(ym)}</span><span style="display:flex;align-items:center;gap:7px;"><span style="font-size:.6rem;color:var(--tx3);">${fmtH(mH)}</span><span class="mg-sum">${fmtNIS(mC)}</span><span class="mg-arr ${gi===0?'open':''}">▼</span></span></div>
+    <div class="mg-body ${gi===0?'open':''}"><div class="tw"><table><thead><tr><th>תאריך</th><th>שעות</th><th>עלות</th><th>סטטוס</th><th></th></tr></thead><tbody>${rows.map(h=>{
+      const isPaid=paidIds.has(h.id);
+      const noEnd=!h.end;
+      return`<tr><td style="white-space:nowrap;">${fmtDate(h.date)}${h.start?` <span style="color:var(--tx3);font-size:.57rem;">${h.start}${h.end?'→'+h.end:'→?'}</span>`:''}</td>
+      <td>${h.hours>0?fmtH(h.hours):'<span style="color:var(--tx3);">—</span>'}${noEnd?` <button class="gbtn" onclick="openEditHrs('${h.id}','${id}')" style="padding:2px 6px;font-size:.58rem;margin-right:3px;">עדכן סיום</button>`:''}</td>
+      <td style="font-weight:700;color:var(--ac);white-space:nowrap;">${h.cost>0?fmtNIS(h.cost):'—'}</td>
+      <td><span class="badge ${isPaid?'g':'r'}">${isPaid?'שולם':'לא שולם'}</span></td>
+      <td style="white-space:nowrap;"><button class="tact" onclick="openShiftPayModal('${h.id}','${id}')" title="שלם" style="color:var(--ac3);font-size:.72rem;font-weight:700;padding:4px 6px;border:1px solid var(--ac3);border-radius:4px;">${isPaid?'✓':'שלם'}</button><button class="tact e" onclick="openEditHrs('${h.id}','${id}')">✏️</button><button class="tact d" onclick="delHrs('${h.id}','${id}')">🗑</button></td></tr>`;
+    }).join('')}</tbody></table></div></div></div>`;
+  }).join(''):`<div class="mpty" style="padding:12px;"><div class="mpty-i">🕐</div>אין משמרות</div>`;
+
+  const paysHtml=pays.length?`<div style="margin-top:9px;"><div class="sec-lbl">תשלומים שבוצעו</div><div class="tw"><table><thead><tr><th>תאריך</th><th>סכום</th><th>הערה</th><th></th></tr></thead><tbody>${pays.map(p=>`<tr><td>${fmtDate(p.date)}</td><td style="font-weight:700;color:var(--ac);">${fmtNIS(p.amt)}</td><td style="color:var(--tx2);">${p.note||'—'}</td><td><button class="tact d" onclick="delPay('${p.id}','${id}')">🗑</button></td></tr>`).join('')}</tbody></table></div></div>`:'';
+
+  const wd=document.getElementById('wd-'+id);
+  wd.innerHTML=`
+    <div class="wd-kpis">
+      <div class="wd-k"><div class="wd-kv" style="color:var(--ac);">${fmtH(totH)}</div><div class="wd-kl">שעות</div></div>
+      <div class="wd-k"><div class="wd-kv" style="color:var(--ac3);">${fmtNIS(owed)}</div><div class="wd-kl">לתשלום</div></div>
+      <div class="wd-k"><div class="wd-kv" style="color:${rem>0?'var(--er)':'var(--ac)'};">${fmtNIS(rem)}</div><div class="wd-kl">נשאר</div></div>
+    </div>
+    <div class="pay-bar-wrap">
+      <div style="display:flex;justify-content:space-between;font-size:.72rem;"><span style="color:var(--tx3);">שולם: <strong style="color:var(--ac);">${fmtNIS(paid)}</strong></span><span style="color:var(--tx3);">₪${w.rate}/שעה · ${w.phone||'—'}</span></div>
+      <div class="pay-bar-track"><div class="pay-bar-fill" style="width:${owed>0?Math.min(100,(paid/owed*100)).toFixed(1):0}%"></div></div>
+    </div>
+    <div class="wd-btns">
+      <button class="gbtn g" onclick="openAddDrawer('hrs','${id}')">➕ משמרת</button>
+      <button class="gbtn" onclick="openPayModal('${id}')">💳 תשלום</button>
+      <button class="gbtn" onclick="markAllPaid('${id}')">✅ שולם הכל</button>
+    </div>
+    ${logHtml}${paysHtml}
+  `;
+  wd.classList.add('open');
+  if(scroll){setTimeout(()=>wd.scrollIntoView({behavior:'smooth',block:'nearest'}),80);}
+}
+
+function openEditWorker(id){const w=getWorker(id);if(!w)return;document.getElementById('ewId').value=id;document.getElementById('ewName').value=w.name;document.getElementById('ewRole').value=w.role||'';document.getElementById('ewRate').value=w.rate;document.getElementById('ewPhone').value=w.phone||'';document.getElementById('ewStatus').value=w.status||'active';openModal('editWorkerModal');}
+function saveEditWorker(){const id=document.getElementById('ewId').value;const w=getWorker(id);if(!w)return;const name=document.getElementById('ewName').value.trim();const rate=parseFloat(document.getElementById('ewRate').value);if(!name||isNaN(rate)||rate<0){toast('נתונים לא תקינים','err');return;}Object.assign(w,{name,role:document.getElementById('ewRole').value.trim(),rate,phone:document.getElementById('ewPhone').value.trim(),status:document.getElementById('ewStatus').value});save();closeModal('editWorkerModal');toast('עודכן ✓');renderWorkers();populateWorkerSelects();renderDash();}
+function delWorker(id){if(!confirm('למחוק עובד?'))return;workers=workers.filter(w=>w.id!==id);if(_openWorker===id)_openWorker=null;save();renderWorkers();populateWorkerSelects();renderDash();toast('נמחק');}
+
+// ══════════════════════════════════
+// PAYMENTS
+// ══════════════════════════════════
+function openPayModal(wid){
+  const w=getWorker(wid);if(!w)return;
+  const owed=workerOwed(wid),paid=workerPaid(wid),rem=owed-paid;
+  document.getElementById('payWid').value=wid;
+  document.getElementById('payModalTitle').innerHTML=`תשלום ל${w.name} <button class="modal-close" onclick="closeModal('payModal')">✕</button>`;
+  document.getElementById('payBalance').innerHTML=`לתשלום: <strong style="color:var(--ac3);">${fmtNIS(owed)}</strong> &nbsp;|&nbsp; שולם: <strong style="color:var(--ac);">${fmtNIS(paid)}</strong> &nbsp;|&nbsp; נשאר: <strong style="color:${rem>0?'var(--er)':'var(--ac)'};">${fmtNIS(rem)}</strong>`;
+  document.getElementById('payAmt').value=rem>0?rem.toFixed(0):'';
+  document.getElementById('payDate').value=todayStr();
+  document.getElementById('payNote').value='';
+  openModal('payModal');
+}
+function openShiftPayModal(shiftId,wid){
+  const h=hoursLog.find(r=>r.id===shiftId);const w=getWorker(wid);
+  if(!h||!w)return;
+  const paidIds=paidShiftIds(wid);
+  const isPaid=paidIds.has(shiftId);
+  document.getElementById('payWid').value=wid;
+  document.getElementById('payModalTitle').innerHTML=`תשלום משמרת — ${w.name} <button class="modal-close" onclick="closeModal('payModal')">✕</button>`;
+  document.getElementById('payBalance').innerHTML=`תאריך: <strong>${fmtDate(h.date)}</strong> &nbsp;|&nbsp; שעות: <strong style="color:var(--ac);">${fmtH(h.hours)}</strong> &nbsp;|&nbsp; עלות: <strong style="color:var(--ac3);">${fmtNIS(h.cost)}</strong><br>סטטוס: <strong style="color:${isPaid?'var(--ac)':'var(--er);'};">${isPaid?'שולם כבר':'לא שולם'}</strong>`;
+  document.getElementById('payAmt').value=isPaid?'':h.cost.toFixed(0);
+  document.getElementById('payDate').value=todayStr();
+  document.getElementById('payNote').value=`משמרת ${fmtDate(h.date)}`;
+  openModal('payModal');
+}
+function savePay(){
+  const wid=document.getElementById('payWid').value;
+  const amt=parseFloat(document.getElementById('payAmt').value);
+  if(isNaN(amt)||amt<=0){toast('נא להזין סכום','err');return;}
+  payments.push({id:uid(),wid,amt,date:document.getElementById('payDate').value,note:document.getElementById('payNote').value.trim(),createdAt:new Date().toISOString()});
+  save();closeModal('payModal');toast('תשלום נרשם ✓');
+  renderWages();renderDash();if(_openWorker===wid)renderWorkerDetail(wid,false);renderWorkers();
+}
+function markAllPaid(wid){const rem=workerOwed(wid)-workerPaid(wid);if(rem<=0){toast('אין יתרה');return;}payments.push({id:uid(),wid,amt:rem,date:todayStr(),note:'שולם הכל',createdAt:new Date().toISOString()});save();toast('✓ שולם הכל');renderWorkerDetail(wid,false);renderWages();renderDash();}
+function delPay(pid,wid){if(!confirm('למחוק תשלום?'))return;payments=payments.filter(p=>p.id!==pid);save();renderWorkerDetail(wid,false);renderWages();renderDash();toast('נמחק');}
+
+// ══════════════════════════════════
+// HOURS
+// ══════════════════════════════════
+function populateWorkerSelects(){
+  const actOpts=`<option value="">— בחר עובד —</option>`+workers.filter(w=>w.status==='active').map(w=>`<option value="${w.id}">${w.name}</option>`).join('');
+  document.getElementById('hrsWorker').innerHTML=actOpts;
+  const allOpts=`<option value="">— בחר עובד —</option>`+workers.map(w=>`<option value="${w.id}">${w.name}</option>`).join('');
+  document.getElementById('ehWorker').innerHTML=allOpts;
+}
+function toggleBreak(){const en=document.getElementById('hrsBreakEnable').checked;document.getElementById('hrsBreakWrap').style.display=en?'':'none';calcHrsFromTime();updateHrsPreview();}
+function getBreakMins(){if(!document.getElementById('hrsBreakEnable').checked)return 0;return parseFloat(document.getElementById('hrsBreak').value)||0;}
+function getBreakMode(){return document.querySelector('input[name="bm"]:checked')?.value||'deduct';}
+function calcHrsFromTime(){
+  const s=document.getElementById('hrsStart').value,e=document.getElementById('hrsEnd').value;
+  if(s&&e){const[sh,sm]=s.split(':').map(Number),[eh,em]=e.split(':').map(Number),diff=(eh*60+em)-(sh*60+sm);
+  if(diff>0){document.getElementById('hrsHours').value=(diff/60).toFixed(2).replace(/\.?0+$/,'');updateHrsPreview();}}
+}
+function selBC(v){document.getElementById('bmD').checked=v==='deduct';document.getElementById('bmP').checked=v==='partial';document.getElementById('bchipD').className='bchip'+(v==='deduct'?' ck-d':'');document.getElementById('bchipP').className='bchip'+(v==='partial'?' ck-p':'');updateHrsPreview();}
+function selBCE(v){document.getElementById('ebmD').checked=v==='deduct';document.getElementById('ebmP').checked=v==='partial';document.getElementById('ehChipD').className='bchip'+(v==='deduct'?' ck-d':'');document.getElementById('ehChipP').className='bchip'+(v==='partial'?' ck-p':'');}
+function updateHrsPreview(){
+  const wid=document.getElementById('hrsWorker').value,gross=parseFloat(document.getElementById('hrsHours').value)||0;
+  const w=getWorker(wid),el=document.getElementById('hrsPreview');
+  if(w&&gross>0){const bm=getBreakMins(),mode=getBreakMode(),net=calcNet(gross,bm,mode);el.style.display='block';const note=bm>0&&mode==='deduct'?` <span style="font-size:.63rem;color:var(--tx3);">(${fmtH(gross)}-${bm}ד'=${fmtH(net)})</span>`:bm>0?' <span style="font-size:.63rem;color:var(--ac3);">(הפסקה שולמה)</span>':'';document.getElementById('hrsPreviewAmt').innerHTML=fmtNIS(w.rate*net)+note;}else el.style.display='none';
+}
+function addHoursEntry(){
+  const wid=document.getElementById('hrsWorker').value,date=document.getElementById('hrsDate').value;
+  let gross=parseFloat(document.getElementById('hrsHours').value)||0;
+  const start=document.getElementById('hrsStart').value,end=document.getElementById('hrsEnd').value;
+  if(!wid){toast('נא לבחור עובד','err');return;}
+  if(!date){toast('נא לבחור תאריך','err');return;}
+  if(!gross&&!start){toast('נא להזין שעות או שעת התחלה','err');return;}
+  const w=getWorker(wid),bm=getBreakMins(),mode=getBreakMode(),net=calcNet(gross,bm,mode);
+  hoursLog.push({id:uid(),wid,date,hours:gross,hoursNet:net,start,end,breakMins:bm,breakMode:mode,desc:document.getElementById('hrsDesc').value.trim(),type:'regular',cost:w&&gross>0?w.rate*net:0,createdAt:new Date().toISOString()});
+  save();['hrsHours','hrsStart','hrsEnd','hrsDesc'].forEach(i=>document.getElementById(i).value='');
+  document.getElementById('hrsBreak').value=30;document.getElementById('hrsPreview').style.display='none';selBC('deduct');
+  toast('✓ משמרת נשמרה');closeAddDrawer();renderDash();
+  if(_openWorker===wid)renderWorkerDetail(wid,false); else renderWorkers();
+  renderWages();
+}
+function calcEhFromTime(){const s=document.getElementById('ehStart').value,e=document.getElementById('ehEnd').value,bm=parseFloat(document.getElementById('ehBreak').value)||0;if(s&&e){const[sh,sm]=s.split(':').map(Number),[eh,em]=e.split(':').map(Number),diff=(eh*60+em)-(sh*60+sm);if(diff>0)document.getElementById('ehHours').value=(diff/60).toFixed(2).replace(/\.?0+$/,'');}}
+function openEditHrs(id,wid){
+  const h=hoursLog.find(r=>r.id===id);if(!h)return;
+  document.getElementById('ehId').value=id;document.getElementById('ehWid').value=wid||h.wid;
+  document.getElementById('ehWorker').value=h.wid;document.getElementById('ehDate').value=h.date;
+  document.getElementById('ehHours').value=h.hours;document.getElementById('ehStart').value=h.start||'';
+  document.getElementById('ehEnd').value=h.end||'';document.getElementById('ehBreak').value=h.breakMins||0;
+  document.getElementById('ehDesc').value=h.desc||'';selBCE(h.breakMode||'deduct');
+  openModal('editHrsModal');
+}
+function saveEditHrs(){
+  const id=document.getElementById('ehId').value,h=hoursLog.find(r=>r.id===id);if(!h)return;
+  const gross=parseFloat(document.getElementById('ehHours').value)||0,wid=document.getElementById('ehWorker').value;
+  if(!wid){toast('נא לבחור עובד','err');return;}
+  const bm=parseFloat(document.getElementById('ehBreak').value)||0,mode=document.querySelector('input[name="ebm"]:checked')?.value||'deduct',net=calcNet(gross,bm,mode),w=getWorker(wid);
+  Object.assign(h,{wid,date:document.getElementById('ehDate').value,hours:gross,hoursNet:net,start:document.getElementById('ehStart').value,end:document.getElementById('ehEnd').value,breakMins:bm,breakMode:mode,desc:document.getElementById('ehDesc').value.trim(),cost:w&&gross>0?w.rate*net:0});
+  save();closeModal('editHrsModal');toast('עודכן ✓');renderDash();renderWages();
+  const owid=document.getElementById('ehWid').value;
+  if(_openWorker) renderWorkerDetail(_openWorker,false);
+}
+function delHrs(id,wid){if(!confirm('למחוק?'))return;hoursLog=hoursLog.filter(h=>h.id!==id);save();renderWorkerDetail(wid,false);renderDash();renderWages();toast('נמחק');}
+
+// ══════════════════════════════════
+// DASHBOARD
+// ══════════════════════════════════
+let _dashEmpOpen=null;
+function renderDash(){
+  const totExp=expenses.reduce((s,e)=>s+e.amt,0);
+  const totWages=hoursLog.reduce((s,h)=>s+h.cost,0);
+  const totPaid=payments.reduce((s,p)=>s+p.amt,0);
+  const totH=hoursLog.reduce((s,h)=>s+h.hours,0);
+  const totHNet=hoursLog.reduce((s,h)=>s+(h.hoursNet!==undefined?h.hoursNet:h.hours),0);
+  const totBreakMins=hoursLog.reduce((s,h)=>s+(h.breakMins||0),0);
+  const numActive=workers.filter(w=>w.status==='active').length;
+  const totAll=totExp+totWages;
+
+  document.getElementById('dashKpi').innerHTML=`
+    <div class="kpi c-red span2"><div class="kv-lbl">סה"כ כל ההוצאות</div><div class="kv-val">${fmtNIS(totAll)}</div><div class="kv-sub">חומרים ${fmtNIS(totExp)} · שכר ${fmtNIS(totWages)}</div></div>
+    <div class="kpi c-yellow"><div class="kv-lbl">הוצאות חומרים</div><div class="kv-val">${fmtNIS(totExp)}</div><div class="kv-sub">${expenses.length} רשומות</div></div>
+    <div class="kpi c-green"><div class="kv-lbl">סה"כ משכורות</div><div class="kv-val">${fmtNIS(totWages)}</div><div class="kv-sub">שולם ${fmtNIS(totPaid)}</div></div>
+    <div class="kpi c-blue"><div class="kv-lbl">שולם לעובדים</div><div class="kv-val">${fmtNIS(totPaid)}</div><div class="kv-sub">נשאר ${fmtNIS(totWages-totPaid)}</div></div>
+    <div class="kpi c-purple"><div class="kv-lbl">עובדים פעילים</div><div class="kv-val">${numActive}</div><div class="kv-sub">${workers.length} סה"כ</div></div>
+    <div class="kpi c-green"><div class="kv-lbl">שעות עבודה</div><div class="kv-val">${fmtH(totH)}</div><div class="kv-sub">נטו ${fmtH(totHNet)}</div></div>
+    <div class="kpi c-blue"><div class="kv-lbl">סה"כ הפסקות</div><div class="kv-val">${fmtH(totBreakMins/60)}</div><div class="kv-sub">${Math.round(totBreakMins)} דקות</div></div>
+  `;
+
+  // cat breakdown
+  const catMap={};expenses.forEach(e=>{catMap[e.cat]=(catMap[e.cat]||0)+e.amt;});
+  const catArr=Object.entries(catMap).sort((a,b)=>b[1]-a[1]);
+  const maxC=catArr[0]?.[1]||1;
+  document.getElementById('dashCatList').innerHTML=catArr.length?catArr.map(([cat,amt])=>`<div style="margin-bottom:8px;"><div style="display:flex;justify-content:space-between;margin-bottom:3px;"><span style="font-size:.76rem;font-weight:700;">${cat}</span><span style="font-size:.76rem;font-weight:700;color:var(--ac3);">${fmtNIS(amt)}</span></div><div style="height:4px;background:var(--sf3);border-radius:3px;"><div style="height:100%;width:${(amt/maxC*100).toFixed(1)}%;background:linear-gradient(90deg,var(--ac3),var(--ac2));border-radius:3px;"></div></div></div>`).join(''):`<div class="mpty" style="padding:10px;"><div class="mpty-i">📦</div>אין הוצאות</div>`;
+
+  // emp summary — each esc expands inline
+  const empMap={};hoursLog.forEach(h=>{if(!empMap[h.wid])empMap[h.wid]={h:0,hNet:0,cost:0};empMap[h.wid].h+=h.hours;empMap[h.wid].hNet+=(h.hoursNet!==undefined?h.hoursNet:h.hours);empMap[h.wid].cost+=h.cost;});
+  const empArr=Object.entries(empMap).sort((a,b)=>b[1].cost-a[1].cost);
+  const maxCost=empArr[0]?.[1].cost||1;
+  const empEl=document.getElementById('dashEmpList');
+  if(!empArr.length){empEl.innerHTML=`<div class="mpty" style="padding:10px;"><div class="mpty-i">👷</div>אין נתונים</div>`;return;}
+  empEl.innerHTML=empArr.map(([wid,d])=>{
+    const w=getWorker(wid),paid=workerPaid(wid),rem=d.cost-paid;
+    return`<div class="esc${_dashEmpOpen===wid?' open':''}" id="desc-${wid}" onclick="toggleDashEmp('${wid}')">
+      <div class="esc-top"><span class="esc-name">${w?w.name:'—'}</span><span class="esc-amt">${fmtNIS(d.cost)}</span></div>
+      <div class="esc-bar"><div class="esc-fill" style="width:${(d.cost/maxCost*100).toFixed(1)}%"></div></div>
+      <div class="esc-stats"><span class="esc-s">${fmtH(d.h)} <span>שעות</span></span>${d.hNet<d.h?`<span class="esc-s" style="color:var(--ac2);">${fmtH(d.hNet)} <span>נטו</span></span>`:''}<span class="esc-s" style="color:${rem>0?'var(--er)':'var(--ac)'};">נשאר <span>${fmtNIS(rem)}</span></span></div>
+      <div class="esc-detail${_dashEmpOpen===wid?' open':''}" id="escd-${wid}" onclick="event.stopPropagation()"></div>
+    </div>`;
+  }).join('');
+  // fill open detail if exists
+  if(_dashEmpOpen) fillDashEmpDetail(_dashEmpOpen);
+}
+function toggleDashEmp(wid){
+  if(_dashEmpOpen===wid){_dashEmpOpen=null;document.getElementById('desc-'+wid)?.classList.remove('open');document.getElementById('escd-'+wid).classList.remove('open');return;}
+  if(_dashEmpOpen){document.getElementById('desc-'+_dashEmpOpen)?.classList.remove('open');document.getElementById('escd-'+_dashEmpOpen)?.classList.remove('open');}
+  _dashEmpOpen=wid;document.getElementById('desc-'+wid)?.classList.add('open');document.getElementById('escd-'+wid)?.classList.add('open');
+  fillDashEmpDetail(wid);
+}
+function fillDashEmpDetail(wid){
+  const el=document.getElementById('escd-'+wid);if(!el)return;
+  const w=getWorker(wid);
+  const logs=hoursLog.filter(h=>h.wid===wid).sort((a,b)=>b.date.localeCompare(a.date)).slice(0,8);
+  const owed=workerOwed(wid),paid=workerPaid(wid),rem=owed-paid;
+  const paidIds=paidShiftIds(wid);
+  el.innerHTML=`<div style="font-size:.75rem;margin-bottom:7px;">
+    <span style="color:var(--tx3);">לתשלום: </span><strong style="color:var(--ac3);">${fmtNIS(owed)}</strong>
+    &nbsp;·&nbsp;<span style="color:var(--tx3);">שולם: </span><strong style="color:var(--ac);">${fmtNIS(paid)}</strong>
+    &nbsp;·&nbsp;<span style="color:var(--tx3);">נשאר: </span><strong style="color:${rem>0?'var(--er)':'var(--ac)'};">${fmtNIS(rem)}</strong>
+    ${w?`&nbsp;·&nbsp;<span style="color:var(--tx3);">₪${w.rate}/שעה</span>`:''}
+  </div>
+  ${logs.length?`<div class="tw"><table><thead><tr><th>תאריך</th><th>שעות</th><th>עלות</th><th>סטטוס</th></tr></thead><tbody>${logs.map(h=>{const ip=paidIds.has(h.id);return`<tr><td>${fmtDate(h.date)}</td><td>${h.hours>0?fmtH(h.hours):'—'}</td><td style="color:var(--ac);">${h.cost>0?fmtNIS(h.cost):'—'}</td><td><span class="badge ${ip?'g':'r'}">${ip?'שולם':'לא שולם'}</span></td></tr>`;}).join('')}</tbody></table></div>`:''}
+  <div style="margin-top:8px;display:flex;gap:6px;flex-wrap:wrap;">
+    <button class="gbtn g" onclick="openPayModal('${wid}')">💳 רשום תשלום</button>
+    <button class="gbtn" onclick="markAllPaid('${wid}')">✅ שולם הכל</button>
+  </div>`;
+}
+
+// ══════════════════════════════════
+// REPORTS
+// ══════════════════════════════════
+function populateRepFilters(){
+  populateWorkerSelects();
+  document.getElementById('repWorker').innerHTML=`<option value="">כל העובדים</option>`+workers.map(w=>`<option value="${w.id}">${w.name}</option>`).join('');
+  const allCats=[...new Set(expenses.map(e=>e.cat))].sort();
+  document.getElementById('repCat').innerHTML=`<option value="">כל הקטגוריות</option>`+allCats.map(c=>`<option value="${c}">${c}</option>`).join('');
+  const years=[...new Set([...expenses.map(e=>e.date.slice(0,4)),...hoursLog.map(h=>h.date.slice(0,4))].filter(Boolean))].sort().reverse();
+  document.getElementById('repYear').innerHTML=`<option value="">כל השנים</option>`+years.map(y=>`<option value="${y}">${y}</option>`).join('');
+}
+function genReport(){
+  const type=document.getElementById('repType').value;
+  const wf=document.getElementById('repWorker').value;
+  const cf=document.getElementById('repCat').value;
+  const yf=document.getElementById('repYear').value;
+  const from=document.getElementById('repFrom').value;
+  const to=document.getElementById('repTo').value;
+  const dateOk=d=>{if(yf&&d.slice(0,4)!==yf)return false;if(from&&d<from)return false;if(to&&d>to)return false;return true;};
+  const filtExp=type==='wages'?[]:expenses.filter(e=>{if(cf&&e.cat!==cf)return false;return dateOk(e.date);});
+  const filtHrs=type==='expenses'?[]:hoursLog.filter(h=>{if(wf&&h.wid!==wf)return false;return dateOk(h.date);});
+  const totE=filtExp.reduce((s,e)=>s+e.amt,0),totW=filtHrs.reduce((s,h)=>s+h.cost,0),totH=filtHrs.reduce((s,h)=>s+h.hours,0);
+  const el=document.getElementById('reportOut');
+  if(!filtExp.length&&!filtHrs.length){el.innerHTML=`<div class="card"><div class="mpty"><div class="mpty-i">📊</div>אין נתונים</div></div>`;document.getElementById('pdfBtn').style.display='none';return;}
+  document.getElementById('pdfBtn').style.display='';
+  el.innerHTML=`<div id="reportPrint">
+    <div class="card"><div class="ct"><div class="ctb"></div>סיכום</div>
+      <div class="sg">
+        ${type!=='wages'?`<div class="kpi c-yellow"><div class="kv-lbl">הוצאות</div><div class="kv-val">${fmtNIS(totE)}</div><div class="kv-sub">${filtExp.length} רשומות</div></div>`:''}
+        ${type!=='expenses'?`<div class="kpi c-green"><div class="kv-lbl">שכר</div><div class="kv-val">${fmtNIS(totW)}</div><div class="kv-sub">${fmtH(totH)} שעות</div></div>`:''}
+        <div class="kpi c-red span2"><div class="kv-lbl">סה"כ</div><div class="kv-val">${fmtNIS(totE+totW)}</div></div>
+      </div>
+    </div>
+    ${filtExp.length?`<div class="card"><div class="ct"><div class="ctb y"></div>הוצאות (${filtExp.length})</div><div class="tw"><table><thead><tr><th>קטגוריה</th><th>תאריך</th><th>ספק</th><th>סכום</th></tr></thead><tbody>${filtExp.sort((a,b)=>b.date.localeCompare(a.date)).map(e=>`<tr><td><span class="badge y">${e.cat}</span></td><td>${fmtDate(e.date)}</td><td style="color:var(--tx2);">${e.desc||'—'}</td><td style="font-weight:700;color:var(--ac3);">${fmtNIS(e.amt)}</td></tr>`).join('')}</tbody></table></div></div>`:''}
+    ${filtHrs.length?`<div class="card"><div class="ct"><div class="ctb b"></div>משמרות (${filtHrs.length})</div><div class="tw"><table><thead><tr><th>עובד</th><th>תאריך</th><th>שעות</th><th>עלות</th></tr></thead><tbody>${filtHrs.sort((a,b)=>b.date.localeCompare(a.date)).map(h=>{const w=getWorker(h.wid);return`<tr><td style="font-weight:700;">${w?w.name:'—'}</td><td>${fmtDate(h.date)}</td><td>${fmtH(h.hours)}</td><td style="font-weight:700;color:var(--ac);">${fmtNIS(h.cost)}</td></tr>`;}).join('')}</tbody></table></div></div>`:''}
+  </div>`;
+}
+function exportPDF(){const c=document.getElementById('reportPrint');if(!c){toast('אין דוח','err');return;}const w=window.open('','_blank');w.document.write(`<!DOCTYPE html><html dir="rtl"><head><meta charset="UTF-8"><style>body{font-family:Arial,sans-serif;direction:rtl;padding:20px;font-size:12px;}table{width:100%;border-collapse:collapse;margin-bottom:14px;}th,td{border:1px solid #ccc;padding:5px 7px;text-align:right;}th{background:#f0f4f8;font-weight:700;}@media print{button{display:none;}}</style></head><body><h3>דוח שיפוץ — ${new Date().toLocaleDateString('he-IL')}</h3>${c.innerHTML}<script>window.onload=()=>window.print();<\/script><!-- BOTTOM NAV -->
+<div class="bnav">
+  <button class="bnav-btn active" id="bn-dash" onclick="showTab('dash',null,'bn-dash')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>דשבורד
+  </button>
+  <button class="bnav-btn" id="bn-expenses" onclick="showTab('expenses',null,'bn-expenses')">
+    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>הוצאות
+  </button>
+  <button class="bnav-plus" onclick="toggleAddDrawer()">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+  <button class="bnav-btn" id="bn-workers" onclick="showTab('workers',null,'bn-workers')">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>עובדים
+  </button>
+  <button class="bnav-btn" id="bn-reports" onclick="showTab('reports',null,'bn-reports')">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>דוחות
+  </button>
+</div>
+</body></html>`);w.document.close();}
+
+// ══════════════════════════════════
+// MISC
+// ══════════════════════════════════
+function toggleMG(hdr){const b=hdr.nextElementSibling,a=hdr.querySelector('.mg-arr');b.classList.toggle('open');a.classList.toggle('open');}
+function exportData(){const b=new Blob([JSON.stringify({workers,hoursLog,expenses,payments,cats},null,2)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='renovation-data.json';a.click();}
+function importData(ev){const f=ev.target.files[0];if(!f)return;const r=new FileReader();r.onload=e=>{try{const d=JSON.parse(e.target.result);if(d.workers)workers=d.workers;if(d.hoursLog)hoursLog=d.hoursLog;if(d.expenses)expenses=d.expenses;if(d.payments)payments=d.payments;if(d.cats)cats=d.cats;save();init();toast('יובא ✓');}catch(err){toast('שגיאה','err');}};r.readAsText(f);}
+function clearAll(){if(!confirm('למחוק הכל?'))return;workers=[];hoursLog=[];expenses=[];payments=[];save();init();toast('נמחק הכל');}
+
+// ══════════════════════════════════
+// INIT
+// ══════════════════════════════════
+function init(){
+  load();
+  const t=localStorage.getItem('rv_theme')||'dark';
+  document.body.classList.toggle('light',t==='light');
+  _selCat=cats[0];renderCatChips();
+  populateWorkerSelects();
+  const today=todayStr();
+  document.getElementById('expDate').value=today;
+  document.getElementById('hrsDate').value=today;
+  document.getElementById('repFrom').value=today.slice(0,8)+'01';
+  document.getElementById('repTo').value=today;
+  _openWorker=null;_dashEmpOpen=null;
+  renderDash();renderWorkers();
+}
+init();
+</script>
+<!-- BOTTOM NAV -->
+<div class="bnav">
+  <button class="bnav-btn active" id="bn-dash" onclick="showTab('dash',null,'bn-dash')">
+    <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>דשבורד
+  </button>
+  <button class="bnav-btn" id="bn-expenses" onclick="showTab('expenses',null,'bn-expenses')">
+    <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>הוצאות
+  </button>
+  <button class="bnav-plus" onclick="toggleAddDrawer()">
+    <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+  <button class="bnav-btn" id="bn-workers" onclick="showTab('workers',null,'bn-workers')">
+    <svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>עובדים
+  </button>
+  <button class="bnav-btn" id="bn-reports" onclick="showTab('reports',null,'bn-reports')">
+    <svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>דוחות
+  </button>
+</div>
+<script>
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
+    navigator.serviceWorker.register('sw.js').catch(()=>{});
+  });
+}
+</script>
+</body>
+</html>
